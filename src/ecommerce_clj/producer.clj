@@ -1,13 +1,19 @@
-(ns ecommerce-clj.producer  
+(ns ecommerce-clj.producer
   (:import
    (java.util Properties)
    (org.apache.kafka.clients.admin AdminClient NewTopic)
    (org.apache.kafka.clients.producer Callback KafkaProducer ProducerConfig ProducerRecord)
    (org.apache.kafka.common.errors TopicExistsException)))
 
-(defn- build-properties [config-map]
+
+(defn- build-properties [{:keys [brooker serilalize-key serialize-value]
+                          :or {brooker  "127.0.0.1:9092"
+                               serilalize-key "org.apache.kafka.common.serialization.StringSerializer"
+                               serialize-value "org.apache.kafka.common.serialization.StringSerializer"}}]
   (doto (Properties.)
-    (.putAll config-map)))
+    (.putAll {ProducerConfig/BOOTSTRAP_SERVERS_CONFIG brooker
+              ProducerConfig/KEY_SERIALIZER_CLASS_CONFIG serilalize-key
+              ProducerConfig/VALUE_SERIALIZER_CLASS_CONFIG serialize-value})))
 
 (defn- create-topic! [topic partitions replication cloud-config]
   (let [ac (AdminClient/create cloud-config)]
@@ -38,9 +44,7 @@
         (.flush producer)))))
 
 (defn -main [& args]
-  (produce! {ProducerConfig/BOOTSTRAP_SERVERS_CONFIG "127.0.0.1:9092"
-             ProducerConfig/KEY_SERIALIZER_CLASS_CONFIG "org.apache.kafka.common.serialization.StringSerializer"
-             ProducerConfig/VALUE_SERIALIZER_CLASS_CONFIG "org.apache.kafka.common.serialization.StringSerializer"}
-            "LOJA_NOVO_PEDIDO"
+  (produce! {}
+            "STORE_NEW_ORDER"
             "ecommerce"
             "[{\"id\":6,\"nome\":\"home-saves\"}]"))

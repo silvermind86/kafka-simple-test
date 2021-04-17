@@ -4,9 +4,18 @@
    (java.util Properties Date)
    (org.apache.kafka.clients.consumer ConsumerConfig KafkaConsumer)))
 
-(defn- build-properties [config-map]
+(defn- build-properties [{:keys [brooker group-id deserilalize-key deserialize-value client-id]
+                          :or {brooker  "127.0.0.1:9092"
+                               group-id "default"
+                               deserilalize-key "org.apache.kafka.common.serialization.StringDeserializer"
+                               deserialize-value "org.apache.kafka.common.serialization.StringDeserializer"
+                               client-id "default-consumer"}}]
   (doto (Properties.)
-    (.putAll config-map)))
+    (.putAll {ConsumerConfig/BOOTSTRAP_SERVERS_CONFIG brooker
+              ConsumerConfig/GROUP_ID_CONFIG group-id
+              ConsumerConfig/CLIENT_ID_CONFIG client-id
+              ConsumerConfig/KEY_DESERIALIZER_CLASS_CONFIG deserilalize-key
+              ConsumerConfig/VALUE_DESERIALIZER_CLASS_CONFIG deserialize-value})))
 
 (defn consume! [configs topic]
   (with-open [consumer (KafkaConsumer. (build-properties configs))]
@@ -23,9 +32,6 @@
       (recur (seq (.poll consumer (Duration/ofSeconds 3)))))))
 
 (defn -main [& args]
-  (consume! {ConsumerConfig/BOOTSTRAP_SERVERS_CONFIG "127.0.0.1:9092"
-             ConsumerConfig/GROUP_ID_CONFIG "ecommerce-clj.consumer"
-             ConsumerConfig/CLIENT_ID_CONFIG "consumer-test"
-             ConsumerConfig/KEY_DESERIALIZER_CLASS_CONFIG "org.apache.kafka.common.serialization.StringDeserializer"
-             ConsumerConfig/VALUE_DESERIALIZER_CLASS_CONFIG "org.apache.kafka.common.serialization.StringDeserializer"}
-            "LOJA_NOVO_PEDIDO"))
+  (consume! {:group-id "ecommerce-clj.consumer"
+             :client-id "consumer-test"}
+            "STORE_NEW_ORDER"))
