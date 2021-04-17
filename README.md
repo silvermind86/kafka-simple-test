@@ -4,7 +4,7 @@
 Just a kafka sandbox in clojure.
 
 ### Starting a local Kafka Server
-At this project root directorie, type:
+At this project root directory, type:
 ```bash
 sudo docker-compose up
 ```
