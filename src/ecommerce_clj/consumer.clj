@@ -1,24 +1,12 @@
 (ns ecommerce-clj.consumer
+  (:require [ecommerce-clj.kafka :as kafka])
   (:import
    (java.time Duration)
-   (java.util Properties Date)
-   (org.apache.kafka.clients.consumer ConsumerConfig KafkaConsumer)))
-
-(defn- build-properties [{:keys [brooker group-id deserilalize-key deserialize-value client-id]
-                          :or {brooker  "127.0.0.1:9092"
-                               group-id "default"
-                               deserilalize-key "org.apache.kafka.common.serialization.StringDeserializer"
-                               deserialize-value "org.apache.kafka.common.serialization.StringDeserializer"
-                               client-id "default-consumer"}}]
-  (doto (Properties.)
-    (.putAll {ConsumerConfig/BOOTSTRAP_SERVERS_CONFIG brooker
-              ConsumerConfig/GROUP_ID_CONFIG group-id
-              ConsumerConfig/CLIENT_ID_CONFIG client-id
-              ConsumerConfig/KEY_DESERIALIZER_CLASS_CONFIG deserilalize-key
-              ConsumerConfig/VALUE_DESERIALIZER_CLASS_CONFIG deserialize-value})))
+   (java.util Date)))
 
 (defn consume! [configs topic]
-  (with-open [consumer (KafkaConsumer. (build-properties configs))]
+  (with-open [consumer (kafka/consumer
+                        (kafka/build-properties configs))]
     (.subscribe consumer [topic])
     (loop [records []]
       (if (> (count records) 0)
@@ -33,5 +21,6 @@
 
 (defn -main [& args]
   (consume! {:group-id "ecommerce-clj.consumer"
-             :client-id "consumer-test"}
+             :client-id (str "consumer-test" (rand-int 500))
+             :type :consumer}
             "STORE_NEW_ORDER"))
