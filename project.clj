@@ -8,5 +8,7 @@
                  [org.apache.kafka/kafka-clients "2.7.0"]
                  [org.slf4j/slf4j-simple "1.7.30"]]
   :repl-options {:init-ns ecommerce-clj.core}
-  :aliases {"produce" ["run" "-m" "ecommerce-clj.producer"]
+  :aliases {"chlorine" ["repl" ":start" ":port" "5555"]
+            "produce" ["run" "-m" "ecommerce-clj.producer"]
             "consume" ["run" "-m" "ecommerce-clj.consumer"]})
+  
